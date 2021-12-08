@@ -78,6 +78,7 @@ function multiplyFloats(x, y) {
     return ((Math.round(100 * x * 100 * y)) / 10000);
 }
 
+/*
 ///function that add picture with specific params
 function addPizzaPicture(src, alt) {
     let img = document.createElement("img");
@@ -86,10 +87,12 @@ function addPizzaPicture(src, alt) {
 
     return img;
 }
+*/
 
 ///function that remove nodes
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
+        /*console.log(parent.firstChild);*/
         parent.removeChild(parent.firstChild);
     }
 }

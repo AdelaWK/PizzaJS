@@ -81,7 +81,6 @@ function multiplyFloats(x, y) {
 ///function that remove nodes
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
-        /*console.log(parent.firstChild);*/
         parent.removeChild(parent.firstChild);
     }
 }

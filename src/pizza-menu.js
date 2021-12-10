@@ -33,7 +33,6 @@ class PizzaMenu {
 
             //check if pizza has name
             if (!item.title) {
-                //if (item.title === undefined || item.title === null || item.title == "") {
                 invalidItem = true;
                 invalidTitle = " - Title is undefined or do not have value: ";
             }
@@ -103,19 +102,16 @@ class PizzaMenu {
             let li = document.createElement('li');
             ul.appendChild(li);
 
-            li.innerHTML = "<div class='li_img'><img src='" + item.image + "' alt='Zdjęcie pizza " + item.title + "'></div><div class='li_text'><h3 id='" + item.id + "'>" + item.id + ". " + item.title + "</h3><p class='li_ingredients'>" + item.ingredients + "</p></div><div class='li_price'>" + item.price.toFixed(2) + " zł</div><div class='li_buy'><button class='li_button' id='" + setPizzaMenuId(item.id) + "'>Zamów</button></div>";
+            li.innerHTML = `<div class='li_img'><img src='${item.image}' alt='Zdjęcie pizza ${item.title}'></div><div class='li_text'><h3 id='${item.id}'>${item.id}. ${item.title}</h3><p class='li_ingredients'>${item.ingredients}</p></div><div class='li_price'>${item.price.toFixed(2)} zł</div><div class='li_buy'><button class='li_button' id='${setPizzaMenuId(item.id)}'>Zamów</button></div>`;
 
-   
         });
         menuDiv.appendChild(ul);
 
         const btns = document.querySelectorAll('.li_button');
-        //console.log(btns);
 
         for (let i = 0; i < btns.length; i++) {
             btns[i].addEventListener('click', function (e) { CartObject.addItemToCart(btns[i].id) }, false);
         }
-
 
         console.log("PizzaMenu: showMenuOnSite END");
     }

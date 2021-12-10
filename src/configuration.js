@@ -78,17 +78,6 @@ function multiplyFloats(x, y) {
     return ((Math.round(100 * x * 100 * y)) / 10000);
 }
 
-/*
-///function that add picture with specific params
-function addPizzaPicture(src, alt) {
-    let img = document.createElement("img");
-    img.src = src;
-    img.alt = alt;
-
-    return img;
-}
-*/
-
 ///function that remove nodes
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {

@@ -17,23 +17,26 @@ class Cart {
 
         //Get site element (with specific id) in which Cart should be showed
         const cartNode = document.getElementById(getCartId());
+
         removeAllChildNodes(cartNode);
+
+        const divCartH1 = document.getElementById('cart_container').getElementsByTagName('div')[0];
+        const divCart = document.getElementById('cart_container').getElementsByTagName('div')[1];
 
         //If cart is empty show messege
         if (this.CartItems.size === 0) {
 
             console.log("Cart: showCartOnSite Cart is empty");
 
-            document.getElementById("cart_container_h2").style.display = "block";
-            document.getElementById("cart").style.display = "none";
+            divCartH1.className = "show";
+            divCart.className = "hide";
 
         }
 
         //if cart is not empty...
         else {
-            document.getElementById("cart_container_h2").style.display = "none";
-            document.getElementById("cart").style.display = "block";
-
+            divCartH1.className = "hide";
+            divCart.className = "show";
 
             console.log("Cart: showCartOnSite Cart has " + this.CartItems.size + " positions");
 
@@ -42,26 +45,24 @@ class Cart {
             //For every pizza type in cart, show pizza name, quantity and price summary for that pizza type 
             this.CartItems.forEach(item => {
 
-
                 let li = document.createElement('li');
                 ul.appendChild(li);
 
-                li.innerHTML = "<div class='cart_text'>" + item.title + "</div><div class='cart_quantity'>" + item.quantity + " x</div><div class='cart_price'>" + item.positionPrice.toFixed(2) + " zł </div><div class='cart_delete'><button class='cart_button' id='" + setCartPizzaId(item.id) + "'>usuń</button></div>";
+                li.innerHTML = `<div class='cart_text'> ${item.title} </div><div class='cart_quantity'> ${item.quantity} x</div><div class='cart_price'> ${item.positionPrice.toFixed(2)} zł </div><div class='cart_delete'><button class='cart_button' id='${setCartPizzaId(item.id)}'>usuń</button></div>`;
 
             });
             cartNode.appendChild(ul);
 
-            const cart_btns = document.querySelectorAll('.cart_button');
-            //console.log(cart_btns);
+            const cartBtns = document.querySelectorAll('.cart_button');
 
-            for (let i = 0; i < cart_btns.length; i++) {
-                cart_btns[i].addEventListener('click', function (e) { CartObject.removeItemFromCart(cart_btns[i].id) }, false);
+            for (let i = 0; i < cartBtns.length; i++) {
+                cartBtns[i].addEventListener('click', function (e) { CartObject.removeItemFromCart(cartBtns[i].id) }, false);
             }
 
 
             //After displaying all pizza, display price for whole order
             let p = document.createElement('p');
-            p.innerHTML = "Suma <span>" + this.PriceSummary.toFixed(2) + " zł" + "</span>";
+            p.innerHTML = `Suma <span>${this.PriceSummary.toFixed(2)} zł</span>`;
             cartNode.appendChild(p);
         }
 
@@ -107,7 +108,6 @@ class Cart {
 
         //If that position is not yet in cart
         else {
-            //console.log ("%o", pizzaItem);
             let newItem = {};
 
             //assing information about pizza (title. quantity, price)
@@ -136,7 +136,7 @@ class Cart {
         //For each position in the Cart, price for position are added
         this.CartItems.forEach(item => {
 
-            this.PriceSummary = addFloats(this.PriceSummary, multiplyFloats(item.quantity, item.positionPrice)); /*addFloats(this.PriceSummary, item.positionPrice);*/
+            this.PriceSummary = addFloats(this.PriceSummary, multiplyFloats(item.quantity, item.positionPrice));
         });
 
         console.log("Cart: countPriceSummary Price is " + this.PriceSummary);

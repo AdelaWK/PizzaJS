@@ -1,8 +1,11 @@
+'use strict';
+
 //class describing Pizza menu oject
 class PizzaMenu {
 
     //Pizza types are stored in map object, where id from json is key
     PizzaMenuItems = new Map();
+    PizzaMenuItemsAll = new Map();
 
     constructor(data) {
         console.log("PizzaMenu - Constructor : START");
@@ -43,28 +46,25 @@ class PizzaMenu {
                 item.image = "";
             }
 
-            //if pizza has picture then just copy its adress to comment param in case if something more would be not ok with other data of this postion
+            //if pizza has picture then just copy its adress to comment param in case if something more would be not ok with other data of this position
             else {
                 invalidImage = invalidImage + item.image;
             }
 
-            //CHeck if pizza has a price or the price is not zero
+            //check if pizza has a price or the price is not zero
             if (item.price === undefined || item.price === null || item.price == "" || item.price == 0) {
                 invalidItem = true;
                 invalidPrice = " - Price is undefined or do not have value: ";
             }
 
-            //check if pizz has ingidients
+            //check if pizza has ingredients
             if (item.ingredients === undefined || item.ingredients === null || item.ingredients.length == 0) {
                 invalidItem = true;
                 InvalidIngredients = " - Ingredients are undefined or do not have value: ";
             }
             else {
-                //item.ingredients = String(item.ingredients).replaceAll(",", ", ");
-                //item.ingredients = item.ingredients.replaceAll("  ", " ");
                 const regex = /(,(?=\S))/ig;
                 item.ingredients = String(item.ingredients).replaceAll(regex, ", ");
-                console.log(item.ingredients);
             }
 
             //if something important is missing (id, price, ingredients) or pizza has duplicated id, then do not add it on menu
@@ -81,10 +81,14 @@ class PizzaMenu {
 
             //if there is no problem with position of menu, then add it to Menu that will be displayed on site
             this.PizzaMenuItems.set(item.id, item);
+
         });
 
+        this.PizzaMenuItemsAll = this.PizzaMenuItems;
         console.log("PizzaMenu - Constructor : Loaded " + this.PizzaMenuItems.size + " menu items");
         console.log("PizzaMenu - Constructor : END");
+
+
     }
 
     //function that displays menu on site
@@ -93,8 +97,28 @@ class PizzaMenu {
 
         //Get site element (with specific id) in which Pizza Menu should be showed
         let menuDiv = document.getElementById(getMenuId());
+        let uls = menuDiv.getElementsByTagName("ul");
+        let ul = "";
+        if (uls.length == 0) {
+            ul = document.createElement('ul');
 
-        let ul = document.createElement('ul');
+            let sortSelector = document.getElementById("pizza_sort");
+            sortSelector.addEventListener("change", function () {
+                PizzaMenuObject.sortPizzaMenuItems(this.value);
+                PizzaMenuObject.showMenuOnSite();
+            });
+
+            let filterInput = document.getElementById("pizza_filter");
+            filterInput.addEventListener("keyup", function () {
+                PizzaMenuObject.filterPizzaMenuItems(this.value);
+                PizzaMenuObject.showMenuOnSite();
+            });
+
+        }
+        else {
+            ul = uls[0];
+            ul.innerHTML = '';
+        }
 
         //for every pizza in pizza menu object
         this.PizzaMenuItems.forEach(item => {
@@ -102,15 +126,15 @@ class PizzaMenu {
             let li = document.createElement('li');
             ul.appendChild(li);
 
-            li.innerHTML = `<div class='li_img'><img src='${item.image}' alt='Zdjęcie pizza ${item.title}'></div><div class='li_text'><h3 id='${item.id}'>${item.id}. ${item.title}</h3><p class='li_ingredients'>${item.ingredients}</p></div><div class='li_price'>${item.price.toFixed(2)} zł</div><div class='li_buy'><button class='li_button' id='${setPizzaMenuId(item.id)}'>Zamów</button></div>`;
-
+            li.innerHTML = `<div class='li_img'><img src='${item.image}' alt='Zdjęcie pizza ${item.title}'></div><div class='li_text'><h3 id='${item.id}'>${item.title}</h3><p class='li_ingredients'>${item.ingredients}</p></div><div class='li_price'>${item.price.toFixed(2)} zł</div><div class='li_buy'><button class='li_button' id='${setPizzaMenuId(item.id)}'>zamów</button></div>`;
         });
+
         menuDiv.appendChild(ul);
 
         const btns = document.querySelectorAll('.li_button');
 
         for (let i = 0; i < btns.length; i++) {
-            btns[i].addEventListener('click', function (e) { CartObject.addItemToCart(btns[i].id) }, false);
+            btns[i].addEventListener('click', function (e) { CartObject.addItemToCart(btns[i].id); CartObject.storeCartToLocalStorage(); }, false);
         }
 
         console.log("PizzaMenu: showMenuOnSite END");
@@ -120,4 +144,49 @@ class PizzaMenu {
         return this.PizzaMenuItems.get(id);
     }
 
+    sortPizzaMenuItems(sortMode) {
+
+        if (sortMode === "name_asc") {
+            this.PizzaMenuItems = (new Map([...this.PizzaMenuItems.entries()].sort((a, b) => a[1].title.localeCompare(b[1].title))));
+        }
+        if (sortMode === "name_des") {
+            this.PizzaMenuItems = (new Map([...this.PizzaMenuItems.entries()].sort((a, b) => b[1].title.localeCompare(a[1].title))));
+        }
+        if (sortMode === "price_asc") {
+            this.PizzaMenuItems = (new Map([...this.PizzaMenuItems.entries()].sort((a, b) => a[1].price - b[1].price)));
+        }
+        if (sortMode === "price_des") {
+            this.PizzaMenuItems = (new Map([...this.PizzaMenuItems.entries()].sort((a, b) => b[1].price - a[1].price)));
+        }
+    }
+
+    filterPizzaMenuItems(filter) {
+        if (filter.trim() === "") {
+            this.PizzaMenuItems = this.PizzaMenuItemsAll;
+            return;
+        }
+
+        let filterWords = filter.split(",");
+
+        let filteredMap = new Map();
+
+        this.PizzaMenuItemsAll.forEach(item => {
+
+            let haveAllWords = true;
+
+            filterWords.forEach(word => {
+                if (!item.ingredients.includes(word.trim())) {
+                    haveAllWords = false;
+                    return;
+                }
+            });
+
+            if (haveAllWords) {
+                filteredMap.set(item.id, item);
+            }
+
+        });
+        this.PizzaMenuItems = filteredMap;
+        return;
+    }
 }

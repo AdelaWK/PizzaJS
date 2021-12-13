@@ -1,3 +1,5 @@
+'use strict';
+
 //Function fetching json file with menu
 async function getPizzaMenu(url) {
 
@@ -6,6 +8,7 @@ async function getPizzaMenu(url) {
     return fetch(url)
         .then(response => {
             const contentType = response.headers.get('content-type');
+
             //If no content then throw error
             if (!contentType) {
                 throw new TypeError("No data");

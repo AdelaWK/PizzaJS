@@ -1,3 +1,4 @@
+'use strict';
 
 let PizzaMenuObject;
 let CartObject;
@@ -19,12 +20,16 @@ window.onload = async function () {
 
     //Create object with all pizzas
     PizzaMenuObject = new PizzaMenu(jsonMenu);
+    PizzaMenuObject.sortPizzaMenuItems("name_asc");
 
     //write pizza menu on site
     PizzaMenuObject.showMenuOnSite();
 
     //create object with cart
     CartObject = new Cart();
+
+    //read stored information about cart
+    CartObject.readCartFromLocalStorage();
 
     //show cart on site
     CartObject.showCartOnSite();

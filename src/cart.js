@@ -1,3 +1,5 @@
+'use strict';
+
 //class describing Cart oject
 class Cart {
 
@@ -9,8 +11,8 @@ class Cart {
 
     constructor() {
 
-
     }
+
     //Function for showing cart on site
     showCartOnSite() {
         console.log("Cart: showCartOnSite START");
@@ -56,14 +58,21 @@ class Cart {
             const cartBtns = document.querySelectorAll('.cart_button');
 
             for (let i = 0; i < cartBtns.length; i++) {
-                cartBtns[i].addEventListener('click', function (e) { CartObject.removeItemFromCart(cartBtns[i].id) }, false);
+                cartBtns[i].addEventListener('click', function (e) { CartObject.removeItemFromCart(cartBtns[i].id); CartObject.storeCartToLocalStorage(); }, false);
             }
-
 
             //After displaying all pizza, display price for whole order
             let p = document.createElement('p');
             p.innerHTML = `Suma <span>${this.PriceSummary.toFixed(2)} zł</span>`;
             cartNode.appendChild(p);
+
+            //After displaying all pizza, display button to clear cart
+            let clearCart = document.createElement("button");
+            clearCart.id = "cart_clear";
+            clearCart.innerHTML = "wyczyść koszyk";
+            clearCart.addEventListener('click', function (e) { CartObject.clearCart() }, false);
+            cartNode.appendChild(clearCart);
+
         }
 
         console.log("Cart: showCartOnSite END");
@@ -72,13 +81,14 @@ class Cart {
 
     //Function adding pizza to Cart
     addItemToCart(id) {
+
         console.log("Cart: addItemToCart START");
 
         //Extract id of pizza from json 
         let pizzaId = extractPizzaMenuId(id);
         pizzaId = Number(pizzaId);
 
-        console.log("You klicked " + id);
+        console.log("You clicked " + id);
 
         //get information about pizza from menu
         let pizzaItem = PizzaMenuObject.getPizzaMenuItem(pizzaId);
@@ -100,7 +110,7 @@ class Cart {
             updatedItem.title = pizzaItem.title;
             updatedItem.quantity = CartItem.quantity + 1;
 
-            updatedItem.positionPrice = pizzaItem.price;/*multiplyFloats(updatedItem.quantity, pizzaItem.price);*/
+            updatedItem.positionPrice = pizzaItem.price;
 
             //set updated position in cart
             this.CartItems.set(pizzaId, updatedItem);
@@ -122,12 +132,12 @@ class Cart {
 
         //after Item is added, refresh cart
         this.refreshCart();
-        console.log("Cart: addItemToCart END");
 
+        console.log("Cart: addItemToCart END");
         return;
     }
 
-    //Function that sumirize price for all Cart
+    //Function that summarize price for all Cart
     countPriceSummary() {
 
         console.log("Cart: countPriceSummary START ");
@@ -172,7 +182,7 @@ class Cart {
                 updatedItem.id = pizzaItem.id;
                 updatedItem.title = pizzaItem.title;
                 updatedItem.quantity = CartItem.quantity - 1;
-                updatedItem.positionPrice = pizzaItem.price;/*multiplyFloats(updatedItem.quantity, pizzaItem.price);*/
+                updatedItem.positionPrice = pizzaItem.price;
 
                 this.CartItems.set(cartId, updatedItem);
             }
@@ -186,6 +196,7 @@ class Cart {
 
         //after Item is removed, refresh cart
         this.refreshCart();
+
         console.log("Cart: removeItemFromCart END");
 
         return;
@@ -196,5 +207,43 @@ class Cart {
     refreshCart() {
         this.countPriceSummary();
         this.showCartOnSite();
+
+        return;
+    }
+
+    storeCartToLocalStorage() {
+        let CartToLocalStorage = new Map();
+
+        this.CartItems.forEach(item => {
+            CartToLocalStorage.set(item.id, item.quantity);
+        });
+
+        localStorage.PizzaJSStorage = JSON.stringify(Array.from(CartToLocalStorage));
+
+        return;
+    }
+
+    readCartFromLocalStorage() {
+        if (typeof (localStorage.PizzaJSStorage) === 'undefined') {
+            return;
+        }
+        let CartInFromLocalStoragemap = new Map(JSON.parse(localStorage.PizzaJSStorage));
+        console.log(CartInFromLocalStoragemap);
+
+        CartInFromLocalStoragemap.forEach((quantity, id) => {
+            for (let i = 0; i < quantity; i++) {
+                this.addItemToCart(getPizzaMenuId() + id);
+            }
+        });
+
+        return;
+    }
+
+    clearCart() {
+        this.CartItems.clear();
+        delete localStorage.PizzaJSStorage;
+        this.refreshCart();
+
+        return;
     }
 }
